@@ -11,9 +11,9 @@
  */
 struct ChimpN
 {
-    const long NAN_LONG = 0x7ff8000000000000L;
+    const uint64_t NAN_LONG = 0x7ff8000000000000L;
     int storedLeadingZeros = INT_MAX;
-    long *storedValues;
+    uint64_t *storedValues;
     bool first = true;
     int size;
     int previousValuesLog2;
@@ -71,7 +71,7 @@ struct ChimpN
         this->threshold = 6 + previousValuesLog2;
         this->setLsb = (int)pow(2, threshold + 1) - 1;
         this->indices = new int[(int)pow(2, threshold + 1)];
-        this->storedValues = new long[previousValues];
+        this->storedValues = new uint64_t[previousValues];
         this->flagZeroSize = previousValuesLog2 + 2;
         this->flagOneSize = previousValuesLog2 + 11;
     }
@@ -82,12 +82,12 @@ struct ChimpN
     }
 
     /**
-     * Adds a new long value to the series. Note, values must be inserted in order.
+     * Adds a new uint64_t value to the series. Note, values must be inserted in order.
      *
      * @param value next floating point value in the series
      */
 
-    void addValue(long value)
+    void addValue(uint64_t value)
     {
         if (first)
         {
@@ -109,15 +109,15 @@ struct ChimpN
     {
         if (first)
         {
-            writeFirst(*((long *)&value));
+            writeFirst(*((uint64_t *)&value));
         }
         else
         {
-            compressValue(*((long *)&value));
+            compressValue(*((uint64_t *)&value));
         }
     }
 
-    void writeFirst(long value)
+    void writeFirst(uint64_t value)
     {
         first = false;
         storedValues[current] = value;
@@ -138,16 +138,16 @@ struct ChimpN
         obs.flush();
     }
 
-    void compressValue(long value)
+    void compressValue(uint64_t value)
     {
         int key = (int)value & setLsb;
-        long xorvalue;
+        uint64_t xorvalue;
         int previousIndex;
         int trailingZeros = 0;
         int currIndex = indices[key];
         if ((index - currIndex) < previousValues)
         {
-            long tempXor = value ^ storedValues[currIndex % previousValues];
+            uint64_t tempXor = value ^ storedValues[currIndex % previousValues];
             trailingZeros = __builtin_ctzll(tempXor);
             if (trailingZeros > threshold)
             {

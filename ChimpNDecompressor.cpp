@@ -10,8 +10,8 @@ struct ChimpNDecompressor
 
     int storedLeadingZeros = INT_MAX;
     int storedTrailingZeros = 0;
-    long storedVal = 0;
-    long *storedValues;
+    uint64_t storedVal = 0;
+    uint64_t *storedValues;
     int current = 0;
     bool first = true;
     bool endOfStream = false;
@@ -23,7 +23,7 @@ struct ChimpNDecompressor
 
     short leadingRepresentation[8] = {0, 8, 12, 16, 18, 20, 22, 24};
 
-    const long NAN_LONG = 0x7ff8000000000000L;
+    const uint64_t NAN_LONG = 0x7ff8000000000000L;
 
     ChimpNDecompressor(uint8_t *bs, int previousValues)
     {
@@ -31,7 +31,7 @@ struct ChimpNDecompressor
         previousValues = previousValues;
         previousValuesLog2 = (int)(log(previousValues) / log(2));
         initialFill = previousValuesLog2 + 9;
-        storedValues = new long[previousValues];
+        storedValues = new uint64_t[previousValues];
     }
 
     /**
@@ -87,7 +87,7 @@ struct ChimpNDecompressor
     {
         // Read value
         int flag = in.readInt(2);
-        long value;
+        uint64_t value;
         switch (flag)
         {
         case 3:

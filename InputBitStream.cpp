@@ -5,7 +5,7 @@
  * <P>This class wraps any {@link InputStream} so that you can treat it as
  * <em>bit</em> stream.  Constructors and methods closely resemble those of
  * {@link InputStream}. Data can be read from such a stream in several ways:
- * reading a (long) natural number in fixed-width, unary, &gamma;, shifted &gamma;, &delta;, &zeta; and (skewed)
+ * reading a (uint64_t) natural number in fixed-width, unary, &gamma;, shifted &gamma;, &delta;, &zeta; and (skewed)
  * Golomb coding, or reading a number of bits that will be stored in a vector of
  * bytes. There is limited support for {@link #mark(int)}/{@link #reset()}
  * operations.
@@ -50,11 +50,11 @@
  * stream to a {@link RepositionableStream} and to fetch by reflection the {@link
  * java.nio.channels.FileChannel} underlying the given input stream, in this
  * order.  If either reference can be successfully fetched, you can use
- * directly the {@link #position(long) position()} method with argument
+ * directly the {@link #position(uint64_t) position()} method with argument
  * <code>pos</code> with the same semantics of a {@link #flush()}, followed by
  * a call to <code>position(pos / 8)</code> (where the latter method belongs
  * either to the underlying stream or to its underlying file channel), followed
- * by a {@link #skip(long) skip(pos % 8)}. However, since the reflective checks are quite
+ * by a {@link #skip(uint64_t) skip(pos % 8)}. However, since the reflective checks are quite
  * heavy they can be disabled using a {@linkplain InputBitStream#InputBitStream(InputStream,  bool) suitable constructor}.
  *
  * <li>Finally, this class implements partially the interface of a  bool iterator.
@@ -105,7 +105,7 @@ struct InputBitStream
     // {
     //     DataInputStream dis = new DataInputStream(InputBitStream.class.getResourceAsStream(resouceFullPath));
     //     int actualLength = IntIterators.unwrap(BinIO.asIntIterator(dis)).length;
-    //     assert array.length == actualLength : resource + " is long " + actualLength + " but we think it should rather be " + array.length;
+    //     assert array.length == actualLength : resource + " is uint64_t " + actualLength + " but we think it should rather be " + array.length;
     //     try
     //     {
     //         dis.close();
@@ -123,7 +123,7 @@ struct InputBitStream
     /** True if we are wrapping an array. */
     bool wrapping;
     /** The number of bits actually read from this bit stream. */
-    long readBits;
+    uint64_t readBits;
     /** Current bit buffer: the lowest {@link #fill} bits represent the current content (the remaining bits are undefined). */
     int current;
     /** The stream buffer. */
@@ -135,7 +135,7 @@ struct InputBitStream
     /** Current number of bytes available in the byte buffer. */
     int avail;
     /** Current position of the first byte in the byte buffer. */
-    long position;
+    uint64_t position;
 
     /** This (non- ) constructor exists just to provide fake initialisation for classes such as {@link DebugInputBitStream}.
      */
@@ -162,6 +162,9 @@ struct InputBitStream
         buffer = a;
         avail = 8000;
         wrapping = true;
+        pos = 0;
+        fill = 0;
+        current = 0;
         //			noBuffer = false;
         //		}
         //		else {
@@ -175,7 +178,7 @@ struct InputBitStream
 
     /** Creates a new input bit stream reading from a file.
      *
-     * <p>This constructor invokes directly {@link FileInputStream#getChannel()} to support {@link #position(long)}.
+     * <p>This constructor invokes directly {@link FileInputStream#getChannel()} to support {@link #position(uint64_t)}.
      *
      * @param name the name of the file.
      * @param bufSize the size in byte of the buffer; it may be 0, denoting no buffering.
@@ -187,7 +190,7 @@ struct InputBitStream
 
     /** Creates a new input bit stream reading from a file.
      *
-     * <p>This constructor invokes directly {@link FileInputStream#getChannel()} to support {@link #position(long)}.
+     * <p>This constructor invokes directly {@link FileInputStream#getChannel()} to support {@link #position(uint64_t)}.
      *
      * @param name the name of the file.
      */
@@ -198,7 +201,7 @@ struct InputBitStream
 
     /** Creates a new input bit stream reading from a file.
      *
-     * <p>This constructor invokes directly {@link FileInputStream#getChannel()} to support {@link #position(long)}.
+     * <p>This constructor invokes directly {@link FileInputStream#getChannel()} to support {@link #position(uint64_t)}.
      *
      * @param file the file.
      */
@@ -209,7 +212,7 @@ struct InputBitStream
 
     /** Creates a new input bit stream reading from a file.
      *
-     * <p>This constructor invokes directly {@link FileInputStream#getChannel()} to support {@link #position(long)}.
+     * <p>This constructor invokes directly {@link FileInputStream#getChannel()} to support {@link #position(uint64_t)}.
      *
      * @param file the file.
      * @param bufSize the size in byte of the buffer; it may be 0, denoting no buffering.
@@ -256,7 +259,7 @@ struct InputBitStream
      * @return the number of bits that can be read from this bit stream without blocking.
      */
 
-    // long available()
+    // uint64_t available()
     // {
     //     return (is.available() + avail) * 8 + fill;
     // }
@@ -265,7 +268,7 @@ struct InputBitStream
      *
      * @return the number of bits read so far.
      */
-    // long readBits()
+    // uint64_t readBits()
     // {
     //     return readBits;
     // }
@@ -278,7 +281,7 @@ struct InputBitStream
      *
      * @param readBits the new value for the number of bits read so far.
      */
-    // void readBits(long readBits)
+    // void readBits(uint64_t readBits)
     // {
     //     this.readBits = readBits;
     // }
@@ -535,16 +538,16 @@ struct InputBitStream
         return (x << len) | readFromCurrent(len);
     }
 
-    /** Reads a fixed number of bits into a long.
+    /** Reads a fixed number of bits into a uint64_t.
      *
      * @param len a bit length.
-     * @return a long whose lower <code>len</code> bits are taken from the stream; the rest is zeroed.
+     * @return a uint64_t whose lower <code>len</code> bits are taken from the stream; the rest is zeroed.
      */
 
-    long readLong(int len)
+    uint64_t readLong(int len)
     {
         int i;
-        long x = 0;
+        uint64_t x = 0;
 
         if (fill < 16)
             refill();

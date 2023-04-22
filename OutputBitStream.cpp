@@ -13,7 +13,7 @@ struct OutputBitStream
 
 	// std::ostream os;
 	/** The number of bits written to this bit stream. */
-	long writtenBits;
+	uint64_t writtenBits;
 	/** Current bit buffer. */
 	int current;
 	/** The stream buffer. */
@@ -27,7 +27,7 @@ struct OutputBitStream
 	int pos;
 	/** Current position of the underlying output stream. */
 
-	long position;
+	uint64_t position;
 	/** Current number of bytes available in the uint8_t buffer. */
 
 	int avail;
@@ -48,7 +48,9 @@ struct OutputBitStream
 		// os = NULL;
 		free = 8;
 		buffer = a;
+		pos = 0;
 		avail = 8000;
+		current = 0;
 		wrapping = true;
 	}
 
@@ -84,12 +86,12 @@ struct OutputBitStream
 	 *
 	 * @return the number of bits written so far.
 	 */
-	// long writtenBits()
+	// uint64_t writtenBits()
 	// {
 	// 	return writtenBits;
 	// }
 
-	// void writtenBits(long writtenBits)
+	// void writtenBits(uint64_t writtenBits)
 	// {
 	// 	this->writtenBits = writtenBits;
 	// }
@@ -158,7 +160,7 @@ struct OutputBitStream
 			return 0;
 	}
 
-	long write(uint8_t *bits, long len)
+	uint64_t write(uint8_t *bits, uint64_t len)
 	{
 		return writeByteOffset(bits, 0, len);
 	}
@@ -175,7 +177,7 @@ struct OutputBitStream
 	 * @return the number of bits written (<code>len</code>).
 	 */
 
-	long write(uint8_t *bits, long offset, long len)
+	uint64_t write(uint8_t *bits, uint64_t offset, uint64_t len)
 	{
 		int initial = (int)(8 - (offset & 0x7));
 		if (initial == 8)
@@ -185,7 +187,7 @@ struct OutputBitStream
 		return writeInt(bits[(int)(offset >> 3)], initial) + writeByteOffset(bits, (int)((offset >> 3) + 1), len - initial);
 	}
 
-	long writeByteOffset(uint8_t *bits, int offset, long len)
+	uint64_t writeByteOffset(uint8_t *bits, int offset, uint64_t len)
 	{
 
 		if (len == 0)
@@ -316,7 +318,7 @@ struct OutputBitStream
 		return len;
 	}
 
-	int writeLong(long x, int len)
+	int writeLong(uint64_t x, int len)
 	{
 		if (len <= free)
 			return writeInCurrent((int)x, len);

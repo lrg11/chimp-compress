@@ -8,7 +8,8 @@
 using namespace std::chrono;
 using namespace std;
 
-static int MINIMUM_TOTAL_BLOCKS = 50000;
+// static int MINIMUM_TOTAL_BLOCKS = 50000;
+static int MINIMUM_TOTAL_BLOCKS = 1;
 static string FILENAMES[] = {
     "city_temperature.csv",
     // "Stocks-Germany-sample.txt",
@@ -23,22 +24,10 @@ void testChimp128()
 
         uint64_t nlines = 0;
 
-        // std::string rawname = filename.substr(0, filename.find_last_of("."));
-
-        // filename = rawname + std::string(".bin");
-
-        // char *c_nlines = (char *)&nlines;
-
-        // myfile.write(c_nlines, sizeof(uint64_t));
-        // myfile.write(c_ncols, sizeof(uint64_t));
-
-        // myfile.close();
-
-        long totalSize = 0;
+        uint64_t totalSize = 0;
         float totalBlocks = 0;
-        // double[] values;
-        long encodingDuration = 0;
-        long decodingDuration = 0;
+        uint64_t encodingDuration = 0;
+        uint64_t decodingDuration = 0;
         while (totalBlocks < MINIMUM_TOTAL_BLOCKS)
         {
             std::vector<double> values;
@@ -70,7 +59,12 @@ void testChimp128()
                 // if (values[i] != uncompressedValues[i])
                 //     cout << "Value did not match" << endl;
             }
+            cout << endl;
             ChimpNDecompressor d(compressor.getOut(), 128);
+            uint8_t * bf = compressor.getOut();
+            for(int i = 0; i < 8000; i++) {
+                cout << (uint8_t)bf[i] << " ";
+            }
             auto uncompresstime = system_clock::now();
             vector<double> uncompressedValues = d.getValues();
             // duration<double> uncompressdiff = system_clock::now() - uncompresstime;
@@ -84,7 +78,7 @@ void testChimp128()
             // }
         }
         cout << "Chimp128: " << filename;
-        printf(" - Bits/value: %.2f, Compression time per block: %.2f, Decompression time per block: %.2f", totalSize / (totalBlocks * 1000), encodingDuration / totalBlocks, decodingDuration / totalBlocks);
+        printf(" - Bits/value: %.2f, Compression time per block: %.2f, Decompression time per block: %.2f\n", totalSize / (totalBlocks * 1000), encodingDuration / totalBlocks, decodingDuration / totalBlocks);
     }
 }
 
