@@ -9,9 +9,9 @@
  *
  * @author Panagiotis Liakos
  */
-class ChimpN
+struct ChimpN
 {
-
+    const long NAN_LONG = 0x7ff8000000000000L;
     int storedLeadingZeros = INT_MAX;
     long *storedValues;
     bool first = true;
@@ -38,11 +38,12 @@ class ChimpN
                               24, 24, 24, 24, 24, 24, 24, 24};
     //      final static short FIRST_DELTA_BITS = 27;
 
-    //      BitOutput out;
+    //      BitOutput obs;
 
-    // OutputBitStream out;
-    std::vector<uint8_t> ob(8000);
-    OutputBitStream out(ob);
+    // OutputBitStream obs;
+    // std::vector<uint8_t>obstr(8000, 0);
+
+    OutputBitStream obs;
 
     int previousValues;
 
@@ -59,11 +60,11 @@ class ChimpN
     int flagZeroSize;
 
     // We should have access to the series?
-public:
     ChimpN(int previousValues)
     {
-        //        out = output;
-
+        //        obs = output;
+        uint8_t *obstr = new uint8_t[8000];
+        obs = OutputBitStream(obstr);
         size = 0;
         this->previousValues = previousValues;
         this->previousValuesLog2 = (int)(log(previousValues) / log(2));
@@ -77,7 +78,7 @@ public:
 
     uint8_t *getOut()
     {
-        return out.buffer;
+        return obs.buffer;
     }
 
     /**
@@ -108,11 +109,11 @@ public:
     {
         if (first)
         {
-            writeFirst(Double.doubleToRawLongBits(value));
+            writeFirst(*((long *)&value));
         }
         else
         {
-            compressValue(Double.doubleToRawLongBits(value));
+            compressValue(*((long *)&value));
         }
     }
 
@@ -120,7 +121,7 @@ public:
     {
         first = false;
         storedValues[current] = value;
-        out.writeLong(storedValues[current], 64);
+        obs.writeLong(storedValues[current], 64);
         indices[(int)value & setLsb] = index;
         size += 64;
     }
@@ -131,70 +132,71 @@ public:
 
     void close()
     {
-        addValue(Double.NaN);
-        out.writeBit(false);
-        out.flush();
+        // C++ the unlike float8 value
+        addValue(NAN_LONG);
+        obs.writeBit(false);
+        obs.flush();
     }
 
     void compressValue(long value)
     {
         int key = (int)value & setLsb;
-        long xor ;
+        long xorvalue;
         int previousIndex;
         int trailingZeros = 0;
         int currIndex = indices[key];
         if ((index - currIndex) < previousValues)
         {
             long tempXor = value ^ storedValues[currIndex % previousValues];
-            trailingZeros = Long.numberOfTrailingZeros(tempXor);
+            trailingZeros = __builtin_ctzll(tempXor);
             if (trailingZeros > threshold)
             {
                 previousIndex = currIndex % previousValues;
-                xor = tempXor;
+                xorvalue = tempXor;
             }
             else
             {
                 previousIndex = index % previousValues;
-                xor = storedValues[previousIndex] ^ value;
+                xorvalue = storedValues[previousIndex] ^ value;
             }
         }
         else
         {
             previousIndex = index % previousValues;
-            xor = storedValues[previousIndex] ^ value;
+            xorvalue = storedValues[previousIndex] ^ value;
         }
 
-        if (xor == 0)
+        if (xorvalue == 0)
         {
-            out.writeInt(previousIndex, this->flagZeroSize);
+            obs.writeInt(previousIndex, this->flagZeroSize);
             size += this->flagZeroSize;
             storedLeadingZeros = 65;
         }
         else
         {
-            int leadingZeros = leadingRound[Long.numberOfLeadingZeros(xor)];
+            int leadingZeros = leadingRound[__builtin_clzll(xorvalue)];
 
             if (trailingZeros > threshold)
             {
                 int significantBits = 64 - leadingZeros - trailingZeros;
-                out.writeInt(512 * (previousValues + previousIndex) + 64 * leadingRepresentation[leadingZeros] + significantBits, this->flagOneSize);
-                out.writeLong(xor >>> trailingZeros, significantBits); // Store the meaningful bits of XOR
+                obs.writeInt(512 * (previousValues + previousIndex) + 64 * leadingRepresentation[leadingZeros] + significantBits, this->flagOneSize);
+                obs.writeLong(xorvalue >> trailingZeros, significantBits); // Store the meaningful bits of XOR
                 size += significantBits + this->flagOneSize;
                 storedLeadingZeros = 65;
             }
             else if (leadingZeros == storedLeadingZeros)
             {
-                out.writeInt(2, 2);
+                obs.writeInt(2, 2);
                 int significantBits = 64 - leadingZeros;
-                out.writeLong(xor, significantBits);
+                obs.writeLong(xorvalue, significantBits);
                 size += 2 + significantBits;
             }
             else
             {
                 storedLeadingZeros = leadingZeros;
                 int significantBits = 64 - leadingZeros;
-                out.writeInt(24 + leadingRepresentation[leadingZeros], 5);
-                out.writeLong(xor, significantBits);
+                obs.writeInt(24 + leadingRepresentation[leadingZeros], 5);
+                obs.writeLong(xorvalue, significantBits);
                 size += 5 + significantBits;
             }
         }
