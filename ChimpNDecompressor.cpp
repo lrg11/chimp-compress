@@ -24,6 +24,7 @@ struct ChimpNDecompressor
     short leadingRepresentation[8] = {0, 8, 12, 16, 18, 20, 22, 24};
 
     const uint64_t NAN_LONG = 0x7ff8000000000000L;
+    std::vector<double> list;
 
     ChimpNDecompressor(uint8_t *bs, int previousValues)
     {
@@ -53,13 +54,14 @@ struct ChimpNDecompressor
 
     std::vector<double> getValues()
     {
-        std::vector<double> list;
-
+        list.clear();
         double value = readValue();
-        while (!endOfStream)
+        int ct = 0;
+        while (ct < 1000 && !endOfStream)
         {
             list.push_back(value);
             value = readValue();
+            ct++;
         }
         return list;
     }

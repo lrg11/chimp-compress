@@ -25,7 +25,7 @@ void testChimp128()
         uint64_t nlines = 0;
 
         uint64_t totalSize = 0;
-        float totalBlocks = 0;
+        int totalBlocks = 0;
         uint64_t encodingDuration = 0;
         uint64_t decodingDuration = 0;
         while (totalBlocks < MINIMUM_TOTAL_BLOCKS)
@@ -60,25 +60,42 @@ void testChimp128()
                 //     cout << "Value did not match" << endl;
             }
             cout << endl;
+            cout << endl;
             ChimpNDecompressor d(compressor.getOut(), 128);
-            uint8_t * bf = compressor.getOut();
-            for(int i = 0; i < 8000; i++) {
-                cout << (uint8_t)bf[i] << " ";
+            uint8_t *bf = compressor.getOut();
+
+            // uint64_t firstvalue  = 0;
+            // for(int i = 0; i < 8; i++) {
+            //     firstvalue <<= 8;
+            //     firstvalue |=  bf[i];
+            // }
+            // cout << "First value is " << *((double *)&firstvalue) << endl;
+
+            // Used to test compress , ok
+
+            for (int i = 0; i < 8000; i++)
+            {
+                cout << (int)bf[i] << " ";
             }
             auto uncompresstime = system_clock::now();
             vector<double> uncompressedValues = d.getValues();
-            // duration<double> uncompressdiff = system_clock::now() - uncompresstime;
-            // cout << "解压所耗时间为：" << uncompressdiff.count() * 1e6 << "us" << endl;
-            // for (int i = 0; i < values.size(); i++)
-            // {
-            //     cout << values[i];
-            //     cout << uncompressedValues[i];
-            //     // if (values[i] != uncompressedValues[i])
-            //     //     cout << "Value did not match" << endl;
-            // }
+            duration<double> uncompressdiff = system_clock::now() - uncompresstime;
+            cout << "解压所耗时间为：" << uncompressdiff.count() * 1e6 << "us" << endl;
+            int diffvalue = 0;
+            for (int i = 0; i < values.size(); i++)
+            {
+                cout << values[i] << " ";
+                cout << uncompressedValues[i] << endl;
+                if (values[i] != uncompressedValues[i])
+                {
+                    diffvalue++;
+                    // cout << "Value did not match" << endl;
+                }
+            }
+            cout << "Diff value has " << diffvalue << " num" << endl;
         }
         cout << "Chimp128: " << filename;
-        printf(" - Bits/value: %.2f, Compression time per block: %.2f, Decompression time per block: %.2f\n", totalSize / (totalBlocks * 1000), encodingDuration / totalBlocks, decodingDuration / totalBlocks);
+        printf(" - Bits/value: %.2f, Compression time per block: %.2f, Decompression time per block: %.2f\n", totalSize * 1.0 / (totalBlocks * 1000), encodingDuration * 1.0 / totalBlocks, decodingDuration * 1.0 / totalBlocks);
     }
 }
 
