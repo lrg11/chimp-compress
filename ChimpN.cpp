@@ -60,13 +60,13 @@ struct ChimpN
     int flagZeroSize;
 
     // We should have access to the series?
-    ChimpN(int previousValues)
+    ChimpN(int preValues)
     {
         //        obs = output;
-        uint8_t *obstr = new uint8_t[8000];
+        uint8_t *obstr = new uint8_t[8*NITEMS];
         obs = OutputBitStream(obstr);
         size = 0;
-        this->previousValues = previousValues;
+        this->previousValues = preValues;
         this->previousValuesLog2 = (int)(log(previousValues) / log(2));
         this->threshold = 6 + previousValuesLog2;
         this->setLsb = (int)pow(2, threshold + 1) - 1;

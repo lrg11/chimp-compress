@@ -7,7 +7,6 @@
  */
 struct ChimpNDecompressor
 {
-
     int storedLeadingZeros = INT_MAX;
     int storedTrailingZeros = 0;
     uint64_t storedVal = 0;
@@ -26,10 +25,12 @@ struct ChimpNDecompressor
     const uint64_t NAN_LONG = 0x7ff8000000000000L;
     std::vector<double> list;
 
-    ChimpNDecompressor(uint8_t *bs, int prevValues)
+    //  parameter name must be diff with member data, 
+    // otherwise using this->namexxx = namexxx
+    ChimpNDecompressor(uint8_t *bs, int preValues)
     {
         in = InputBitStream(bs);
-        previousValues = prevValues;
+        previousValues = preValues;
         previousValuesLog2 = (int)(log(previousValues) / log(2));
         initialFill = previousValuesLog2 + 9;
         storedValues = new uint64_t[previousValues];
@@ -57,7 +58,8 @@ struct ChimpNDecompressor
         list.clear();
         double value = readValue();
         int ct = 0;
-        while (ct < 1000 && !endOfStream)
+
+        while (ct < NITEMS && !endOfStream)
         {
             list.push_back(value);
             value = readValue();

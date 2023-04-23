@@ -82,44 +82,10 @@
 #include <string>
 
 struct InputBitStream
-{
+{ 
     bool DEBUG = false;
-
-    /* Precomputed tables: the i-th entry decodes the stream fragment of 16 bits given by the binary reprentation of i.
-     * The upper 16 bits contain code lengths, the lower 16 bits decoded values. 0 means undecodable. */
-    // int[] GAMMA = new int[256 * 256], DELTA = new int[256 * 256], ZETA_3 = new int[256 * 256], SHIFTED_GAMMA = new int[256 * 256];
-
-    // void fillArrayFromResource(string resource, int array[]) throws IOException
-    // {
-    //     string resouceFullPath = "/it/unimi/dsi/io/" + resource;
-    //     InputStream ris = InputBitStream.class.getResourceAsStream(resouceFullPath);
-    //     if (ris == NULL)
-    //         throw new IOException("Cannot open resource " + resouceFullPath);
-    //     DataInputStream dis = new DataInputStream(new FastBufferedInputStream(ris));
-    //     BinIO.loadInts(dis, array, 0, array.length);
-    //     dis.close();
-    //     assert checkLength(resource, array, resouceFullPath);
-    // }
-
-    // bool checkLength(string resource, int[] array, string resouceFullPath)
-    // {
-    //     DataInputStream dis = new DataInputStream(InputBitStream.class.getResourceAsStream(resouceFullPath));
-    //     int actualLength = IntIterators.unwrap(BinIO.asIntIterator(dis)).length;
-    //     assert array.length == actualLength : resource + " is uint64_t " + actualLength + " but we think it should rather be " + array.length;
-    //     try
-    //     {
-    //         dis.close();
-    //     }
-    //     catch (IOException e)
-    //     {
-    //         throw new RuntimeException(e);
-    //     }
-    //     return true;
-    // }
-
     /** The default size of the byte buffer in bytes (8Ki). */
     int DEFAULT_BUFFER_SIZE = 8 * 1024;
-
     /** True if we are wrapping an array. */
     bool wrapping;
     /** The number of bits actually read from this bit stream. */
@@ -160,7 +126,7 @@ struct InputBitStream
 
         //		if (a.length > 0) {
         buffer = a;
-        avail = 8000;
+        avail = 8 * NITEMS;
         wrapping = true;
         pos = 0;
         fill = 0;

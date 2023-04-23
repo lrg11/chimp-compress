@@ -2,14 +2,17 @@
 #include <chrono>
 #include <string>
 #include <fstream>
+#define NITEMS 3600
 #include "ChimpN.cpp"
 #include "ChimpNDecompressor.cpp"
 #include "CSVReader.cpp"
 using namespace std::chrono;
 using namespace std;
 
+
 // static int MINIMUM_TOTAL_BLOCKS = 50000;
-static int MINIMUM_TOTAL_BLOCKS = 1;
+#define MINIMUM_TOTAL_BLOCKS 1
+
 static string FILENAMES[] = {
     "city_temperature.csv",
     // "Stocks-Germany-sample.txt",
@@ -32,12 +35,12 @@ void testChimp128()
         {
             std::vector<double> values;
             nlines = 0;
-            while (!reader.isEmpty() && nlines < 1000)
+            while (!reader.isEmpty() && nlines < NITEMS)
             {
                 values.push_back(reader.nextLine());
                 nlines++;
             }
-            if (nlines < 1000)
+            if (nlines < NITEMS)
             {
                 break;
             }
@@ -73,10 +76,10 @@ void testChimp128()
 
             // Used to test compress , ok
 
-            for (int i = 0; i < 8000; i++)
-            {
-                cout << (int)bf[i] << " ";
-            }
+            // for (int i = 0; i < 8 * NITEMS; i++)
+            // {
+            //     cout << (int)bf[i] << " ";
+            // }
             auto uncompresstime = system_clock::now();
             vector<double> uncompressedValues = d.getValues();
             duration<double> uncompressdiff = system_clock::now() - uncompresstime;
@@ -94,8 +97,9 @@ void testChimp128()
             }
             cout << "Diff value has " << diffvalue << " num" << endl;
         }
+        cout << "compressed_rate: " << totalSize * 1.0 / (totalBlocks * NITEMS * 64) << endl;
         cout << "Chimp128: " << filename;
-        printf(" - Bits/value: %.2f, Compression time per block: %.2f, Decompression time per block: %.2f\n", totalSize * 1.0 / (totalBlocks * 1000), encodingDuration * 1.0 / totalBlocks, decodingDuration * 1.0 / totalBlocks);
+        printf(" - Bits/value: %.2f, Compression time per block: %.2f, Decompression time per block: %.2f\n", totalSize * 1.0 / (totalBlocks * NITEMS), encodingDuration * 1.0 / totalBlocks, decodingDuration * 1.0 / totalBlocks);
     }
 }
 
