@@ -26,10 +26,10 @@ struct ChimpNDecompressor
     const uint64_t NAN_LONG = 0x7ff8000000000000L;
     std::vector<double> list;
 
-    ChimpNDecompressor(uint8_t *bs, int previousValues)
+    ChimpNDecompressor(uint8_t *bs, int prevValues)
     {
         in = InputBitStream(bs);
-        previousValues = previousValues;
+        previousValues = prevValues;
         previousValuesLog2 = (int)(log(previousValues) / log(2));
         initialFill = previousValuesLog2 + 9;
         storedValues = new uint64_t[previousValues];
