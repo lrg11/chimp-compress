@@ -15,8 +15,8 @@ using namespace std;
 
 static string FILENAMES[] = {
     "city_temperature.csv",
-    // "Stocks-Germany-sample.txt",
-    // "SSD_HDD_benchmarks.csv"
+    "Stocks-Germany-sample.txt",
+    "SSD_HDD_benchmarks.csv"
 };
 
 void testChimp128()
@@ -56,31 +56,9 @@ void testChimp128()
             cout << "压缩所耗时间为：" << diff.count() * 1e6 << "us" << endl;
             totalSize += compressor.getSize();
             totalBlocks += 1;
-            for (int i = 0; i < values.size(); i++)
-            {
-                cout << values[i] << " ";
-                // cout << uncompressedValues[i];
-                // if (values[i] != uncompressedValues[i])
-                //     cout << "Value did not match" << endl;
-            }
-            cout << endl;
-            cout << endl;
+    
             ChimpNDecompressor d(compressor.getOut(), 128);
-            // uint8_t *bf = compressor.getOut();
-
-            // uint64_t firstvalue  = 0;
-            // for(int i = 0; i < 8; i++) {
-            //     firstvalue <<= 8;
-            //     firstvalue |=  bf[i];
-            // }
-            // cout << "First value is " << *((double *)&firstvalue) << endl;
-
-            // Used to test compress , ok
-
-            // for (int i = 0; i < 8 * NITEMS; i++)
-            // {
-            //     cout << (int)bf[i] << " ";
-            // }
+            
             auto uncompresstime = system_clock::now();
             vector<double> uncompressedValues = d.getValues();
             duration<double> uncompressdiff = system_clock::now() - uncompresstime;
@@ -88,8 +66,8 @@ void testChimp128()
             int diffvalue = 0;
             for (int i = 0; i < values.size(); i++)
             {
-                cout << values[i] << " ";
-                cout << uncompressedValues[i] << endl;
+                // cout << values[i] << " ";
+                // cout << uncompressedValues[i] << endl;
                 if (values[i] != uncompressedValues[i])
                 {
                     diffvalue++;
