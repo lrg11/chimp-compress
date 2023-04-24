@@ -46,6 +46,7 @@ void testChimp128()
             }
             ChimpN compressor(128);
             auto starttime = system_clock::now();
+            for(int i = 0; i < 100; i++)
             for (double value : values)
             {
                 compressor.addValue(value);
@@ -65,7 +66,7 @@ void testChimp128()
             cout << endl;
             cout << endl;
             ChimpNDecompressor d(compressor.getOut(), 128);
-            uint8_t *bf = compressor.getOut();
+            // uint8_t *bf = compressor.getOut();
 
             // uint64_t firstvalue  = 0;
             // for(int i = 0; i < 8; i++) {
